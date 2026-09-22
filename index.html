@@ -1,71 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Inventory Calculator</title>.
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div class="dashboard-container">
-    <header>
-        <h1>Mabuk Golden Enterprise</h1>
-        <!-- We moved the export button up here for a cleaner look -->
-        <button id="export-btn" class="btn-export">Download CSV Report</button>
-    </header>
+    <div class="dashboard-container">
+        <header>
+            <h1>Mabuk Golden Enterprise - Building Material</h1>
+            <button id="export-btn" class="btn-export">Download CSV Report</button>
+        </header>
 
-    <main class="dashboard-grid">
-        <!-- Left Column: Input Form -->
-        <section class="card">
-            <h3>Add / Edit Product</h3>
-            <form id="add-item-form">
-                <div class="input-group">
-                    <label>Product Name</label>
-                    <input type="text" id="itemName" placeholder="e.g., 60x60 Glazed Tiles" required>
-                </div>
-                <div class="input-group-row">
+        <main class="dashboard-grid">
+            <section class="card">
+                <h3>Add / Edit Product</h3>
+                <form id="add-item-form">
                     <div class="input-group">
-                        <label>Quantity</label>
-                        <input type="number" id="itemQty" placeholder="0" min="1" required>
+                        <label>Product Name</label>
+                        <input type="text" id="itemName" placeholder="e.g., 60x60 Glazed Tiles" required>
                     </div>
-                    <div class="input-group">
-                        <label>Unit Cost (₦)</label>
-                        <input type="number" id="itemCost" placeholder="0" min="0" required>
+                    <div class="input-group-row">
+                        <div class="input-group">
+                            <label>Quantity</label>
+                            <input type="number" id="itemQty" placeholder="0" min="1" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Unit Cost (₦)</label>
+                            <input type="number" id="itemCost" placeholder="0" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Selling Price (₦)</label>
+                            <input type="number" id="itemPrice" placeholder="0" min="0" required>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Selling Price (₦)</label>
-                        <input type="number" id="itemPrice" placeholder="0" min="0" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary">Add to Inventory</button>
-            </form>
-        </section>
+                    <button type="submit" class="btn-primary">Add to Inventory</button>
+                </form>
+            </section>
 
-        <!-- Right Column: Data & Summary -->
-        <section class="dashboard-data">
-            <div class="card summary-cards">
-                <div class="stat-box">
-                    <h4>Total Cost</h4>
-                    <p>₦<span id="display-cost">0</span></p>
+            <section class="dashboard-data">
+                <div class="card summary-cards">
+                    <div class="stat-box">
+                        <h4>Total Cost</h4>
+                        <p>₦<span id="display-cost">0</span></p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Projected Revenue</h4>
+                        <p>₦<span id="display-revenue">0</span></p>
+                    </div>
+                    <div class="stat-box profit">
+                        <h4>Total Profit</h4>
+                        <p>₦<span id="display-profit">0</span></p>
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <h4>Projected Revenue</h4>
-                    <p>₦<span id="display-revenue">0</span></p>
-                </div>
-                <div class="stat-box profit">
-                    <h4>Total Profit</h4>
-                    <p>₦<span id="display-profit">0</span></p>
-                </div>
-            </div>
 
-            <div class="card">
-                <h3>Current Stock</h3>
-                <ul id="inventory-list">
-                    <!-- JavaScript still injects list items here automatically -->
-                </ul>
-            </div>
-        </section>
-    </main>
-</div>
-<script src="app.js"></script>
+                <div class="card">
+                    <h3>Current Stock</h3>
+                    <ul id="inventory-list">
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
 </body>
+
 </html>
