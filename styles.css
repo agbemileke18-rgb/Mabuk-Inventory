@@ -191,3 +191,9 @@ li button:first-of-type {
         padding: 15px 10px;
     }
 }
+
+.search-input {
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: var(--bg-color);
+}
