@@ -59,11 +59,9 @@ function editItem(idToEdit) {
     submitBtn.style.color = "black";
   }
 }
-function updateDashboard() {
-  listElement.innerHTML = "";
+function updateDashboard(dataToDisplay = inventory) {  listElement.innerHTML = "";
 
-  for (let item of inventory) {
-    const li = document.createElement("li");
+for (let item of dataToDisplay) {    const li = document.createElement("li");
 
     li.textContent = `${item.name} — Qty: ${item.quantity} | Cost: ₦${item.unitCost} | Price: ₦${item.sellingPrice} `;
 
@@ -97,7 +95,7 @@ function updateDashboard() {
     listElement.appendChild(li);
   }
 
-  const financials = calculateFinancials(inventory);
+  const financials = calculateFinancials(dataToDisplay);
 
   costElement.textContent = financials.cost.toLocaleString();
   revenueElement.textContent = financials.revenue.toLocaleString();
@@ -180,3 +178,15 @@ function deleteItem(idToDelete) {
     }
   }
 }
+
+const searchBar = document.getElementById("searchBar");
+
+searchBar.addEventListener("input", function() {
+    const searchTerm = searchBar.value.toLowerCase();
+    
+    const filteredResults = inventory.filter(function(item) {
+        return item.name.toLowerCase().includes(searchTerm);
+    });
+    
+    updateDashboard(filteredResults);
+});
