@@ -172,27 +172,30 @@ formElement.addEventListener("submit", function (event) {
 
 updateDashboard();
 
-const exportButton = document.getElementById("export-btn");
+const exportBtn = document.getElementById("exportBtn");
 
-exportButton.addEventListener("click", function () {
-  let csvContent = "Item ID,Product Name,Quantity,Unit Cost,Selling Price\n";
+exportBtn.addEventListener("click", function() {
+    if (inventory.length === 0) {
+        alert("Your inventory is empty. Nothing to export!");
+        return;
+    }
 
-  for (let item of inventory) {
-    csvContent += `${item.id},"${item.name}",${item.quantity},${item.unitCost},${item.sellingPrice}\n`;
-  }
+    let csvContent = "Product Name,Category,Quantity,Unit Cost (NGN),Selling Price (NGN)\n";
 
-  const fileBlob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    for (let item of inventory) {
+        csvContent += `${item.name},${item.category},${item.quantity},${item.unitCost},${item.sellingPrice}\n`;
+    }
 
-  const temporaryLink = document.createElement("a");
-  const virtualUrl = URL.createObjectURL(fileBlob);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-  temporaryLink.setAttribute("href", virtualUrl);
-  temporaryLink.setAttribute("download", "Mabuk_Inventory_Report.csv");
-
-  document.body.appendChild(temporaryLink);
-  temporaryLink.click();
-
-  document.body.removeChild(temporaryLink);
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "mabuk_inventory_report.csv");
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 });
 
 function deleteItem(idToDelete) {
