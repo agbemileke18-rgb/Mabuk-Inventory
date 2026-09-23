@@ -169,7 +169,7 @@ function deleteItem(idToDelete) {
   const isConfirmed = confirm("Are you sure you want to delete this item? This cannot be undone.");
 
   if (isConfirmed) {
-    const index = inventory.findIndex(function(item) {
+    const index = inventory.findIndex(function (item) {
       return item.id === idToDelete;
     });
 
