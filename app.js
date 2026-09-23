@@ -166,15 +166,17 @@ exportButton.addEventListener("click", function () {
 });
 
 function deleteItem(idToDelete) {
-  const index = inventory.findIndex(function (item) {
-    return item.id === idToDelete;
-  });
+  const isConfirmed = confirm("Are you sure you want to delete this item? This cannot be undone.");
 
-  if (index !== -1) {
-    inventory.splice(index, 1);
+  if (isConfirmed) {
+    const index = inventory.findIndex(function(item) {
+      return item.id === idToDelete;
+    });
 
-    saveInventory();
-
-    updateDashboard();
+    if (index !== -1) {
+      inventory.splice(index, 1);
+      saveInventory();
+      updateDashboard();
+    }
   }
 }
