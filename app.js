@@ -51,6 +51,7 @@ function editItem(idToEdit) {
     document.getElementById("itemQty").value = item.quantity;
     document.getElementById("itemCost").value = item.unitCost;
     document.getElementById("itemPrice").value = item.sellingPrice;
+    document.getElementById("itemCategory").value = item.category || "Tiles";
 
     editingId = idToEdit;
 
@@ -63,7 +64,36 @@ function updateDashboard(dataToDisplay = inventory) {  listElement.innerHTML = "
 
 for (let item of dataToDisplay) {    const li = document.createElement("li");
 
-    li.textContent = `${item.name} — Qty: ${item.quantity} | Cost: ₦${item.unitCost} | Price: ₦${item.sellingPrice} `;
+    const textContainer = document.createElement("div");
+    textContainer.style.flexGrow = "1"; // Pushes your Edit/Delete buttons to the right
+    textContainer.innerHTML = `
+        <strong>${item.name}</strong> 
+        <span class="category-badge">${item.category || "Other"}</span>
+        <br>
+        <span style="font-size: 0.9rem; color: #6c757d;">Qty: ${item.quantity} | Cost: ₦${item.unitCost} | Price: ₦${item.sellingPrice}</span>
+    `;
+    li.appendChild(textContainer);
+
+const searchBar = document.getElementById("searchBar");
+const categoryFilter = document.getElementById("categoryFilter");
+
+function applyFilters() {
+    const searchTerm = searchBar.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+
+    const filteredResults = inventory.filter(function(item) {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+        
+        const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+        
+        return matchesSearch && matchesCategory;
+    });
+
+    updateDashboard(filteredResults);
+}
+
+searchBar.addEventListener("input", applyFilters);
+categoryFilter.addEventListener("change", applyFilters);
 
     const editBtn = document.createElement("button");
     editBtn.textContent = "Edit";
@@ -111,7 +141,8 @@ formElement.addEventListener("submit", function (event) {
       name: document.getElementById("itemName").value,
       quantity: Number(document.getElementById("itemQty").value),
       unitCost: Number(document.getElementById("itemCost").value),
-      sellingPrice: Number(document.getElementById("itemPrice").value)
+      sellingPrice: Number(document.getElementById("itemPrice").value),
+      category: document.getElementById("itemCategory").value,
     };
     inventory.push(newItem);
 
@@ -125,6 +156,7 @@ formElement.addEventListener("submit", function (event) {
       inventory[index].quantity = Number(document.getElementById("itemQty").value);
       inventory[index].unitCost = Number(document.getElementById("itemCost").value);
       inventory[index].sellingPrice = Number(document.getElementById("itemPrice").value);
+      inventory[index].category = document.getElementById("itemCategory").value;
     }
 
     editingId = null;

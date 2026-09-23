@@ -197,3 +197,29 @@ li button:first-of-type {
     margin-bottom: 20px;
     background-color: var(--bg-color);
 }
+
+select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: white;
+    font-family: inherit;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+.category-badge {
+    background-color: var(--text-muted);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 10px;
+    text-transform: uppercase;
+}

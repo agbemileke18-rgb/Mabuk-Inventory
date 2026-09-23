@@ -23,6 +23,30 @@
                         <label>Product Name</label>
                         <input type="text" id="itemName" placeholder="e.g., 60x60 Glazed Tiles" required>
                     </div>
+                    
+                    <div class="input-group">
+                    <label>Category</label>
+                    <select id="itemCategory" required>
+                        <option value="Tiles">Tiles</option>
+                        <option value="White Cement">White Cement</option>
+                        <option value="Genesis">Genesis</option>
+                        <option value="Roofing Sheets">Roofing Sheets</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="searchBar" class="search-input" placeholder="Search by product name..." style="margin-bottom: 0;">
+                    
+                    <select id="categoryFilter" class="search-input" style="margin-bottom: 0; max-width: 200px;">
+                        <option value="All">All Categories</option>
+                        <option value="Tiles">Tiles</option>
+                        <option value="White Cement">White Cement</option>
+                        <option value="Genesis">Genesis</option>
+                        <option value="Roofing Sheets">Roofing Sheets</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    </div>
                     <div class="input-group-row">
                         <div class="input-group">
                             <label>Quantity</label>
