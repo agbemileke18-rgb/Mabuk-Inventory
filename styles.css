@@ -167,3 +167,27 @@ li:last-child {
 li button:first-of-type {
     margin-left: auto; 
 }
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .input-group-row {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    body {
+        padding: 15px 10px;
+    }
+}
