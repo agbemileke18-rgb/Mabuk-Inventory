@@ -12,14 +12,16 @@
 
 <body>
     <div id="auth-container" style="text-align: center; padding: 50px; margin-top: 20px;">
-      <h2>Welcome to MabukStock</h2>
-      <p>Please log in to manage your inventory.</p>
-      
-      <input type="email" id="email-input" placeholder="Enter your email" style="padding: 10px; margin: 5px; width: 80%; max-width: 300px;" /><br>
-      <input type="password" id="password-input" placeholder="Enter your password" style="padding: 10px; margin: 5px; width: 80%; max-width: 300px;" /><br><br>
-      
-      <button id="signup-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Sign Up</button>
-      <button id="login-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Log In</button>
+        <h2>Welcome to MabukStock</h2>
+        <p>Please log in to manage your inventory.</p>
+
+        <input type="email" id="email-input" placeholder="Enter your email"
+            style="padding: 10px; margin: 5px; width: 80%; max-width: 300px;" /><br>
+        <input type="password" id="password-input" placeholder="Enter your password"
+            style="padding: 10px; margin: 5px; width: 80%; max-width: 300px;" /><br><br>
+
+        <button id="signup-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Sign Up</button>
+        <button id="login-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Log In</button>
     </div>
 
     <div class="dashboard-container">
@@ -114,60 +116,60 @@
     </div>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-      const firebaseConfig = {
-        apiKey: "AizaSyB1ZiwhWgewKHrskLCuOVw412P6NZ9__4",
-        authDomain: "mabukstock.firebaseapp.com",
-        projectId: "mabukstock",
-        storageBucket: "mabukstock.firebasestorage.app",
-        messagingSenderId: "749625031008",
-        appId: "1:749625031008:web:a8e565bcbdde99c22d8605",
-        measurementId: "G-EK9NNGR1R7"
-      };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlZIwhWgeWkHrskLCuOVuW4l2P6NZ9__4",
+            authDomain: "mabukstock.firebaseapp.com",
+            projectId: "mabukstock",
+            storageBucket: "mabukstock.firebasestorage.app",
+            messagingSenderId: "749625031008",
+            appId: "1:749625031008:web:a8e565bcbdde99c22d0605",
+            measurementId: "G-0K9NNGR1R7"
+        };
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      window.db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        window.db = getFirestore(app);
 
-      const emailInput = document.getElementById('email-input');
-      const passwordInput = document.getElementById('password-input');
-      const signupBtn = document.getElementById('signup-btn');
-      const loginBtn = document.getElementById('login-btn');
-      const authContainer = document.getElementById('auth-container');
-      const dashboardContainer = document.querySelector('.dashboard-container'); 
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const signupBtn = document.getElementById('signup-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const authContainer = document.getElementById('auth-container');
+        const dashboardContainer = document.querySelector('.dashboard-container');
 
-      signupBtn.addEventListener('click', () => {
-        createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-          .then((userCredential) => {
-            alert("Account created successfully!");
-          })
-          .catch((error) => {
-            alert("Error: " + error.message);
-          });
-      });
+        signupBtn.addEventListener('click', () => {
+            createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+                .then((userCredential) => {
+                    alert("Account created successfully!");
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
 
-      loginBtn.addEventListener('click', () => {
-        signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-          .then((userCredential) => {
-            alert("Logged in successfully!");
-          })
-          .catch((error) => {
-            alert("Error: " + error.message);
-          });
-      });
+        loginBtn.addEventListener('click', () => {
+            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+                .then((userCredential) => {
+                    alert("Logged in successfully!");
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          authContainer.style.display = "none";
-          dashboardContainer.style.display = "block";
-        } else {
-          authContainer.style.display = "block";
-          dashboardContainer.style.display = "none";
-        }
-      });
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                authContainer.style.display = "none";
+                dashboardContainer.style.display = "block";
+            } else {
+                authContainer.style.display = "block";
+                dashboardContainer.style.display = "none";
+            }
+        });
     </script>
 
     <script src="app.js"></script>
