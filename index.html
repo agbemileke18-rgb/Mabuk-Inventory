@@ -26,6 +26,8 @@
 
     <div class="dashboard-container">
         <header>
+            <button id="logout-btn"
+                style="margin-bottom: 20px; padding: 8px 16px; background-color: #ff4c4c; color: white; border: none; border-radius: 4px; cursor: pointer;">Log Out</button>
             <h1>Mabuk Golden Enterprise - Inventory Calculator</h1>
             <button id="exportBtn" class="btn-primary">Download CSV Report</button>
         </header>
@@ -117,7 +119,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -159,6 +161,16 @@
                 .catch((error) => {
                     alert("Error: " + error.message);
                 });
+        });
+
+        const logoutBtn = document.getElementById('logout-btn');
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                alert("Logged out successfully!");
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
         });
 
         onAuthStateChanged(auth, (user) => {
