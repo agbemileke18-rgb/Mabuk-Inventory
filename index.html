@@ -22,12 +22,17 @@
 
         <button id="signup-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Sign Up</button>
         <button id="login-btn" style="padding: 10px 20px; margin: 5px; cursor: pointer;">Log In</button>
+        <p style="margin-top: 15px; text-align: center;">
+            <a href="#" onclick="handleForgotPassword(); return false;"
+                style="color: #0066cc; text-decoration: underline; cursor: pointer;">Forgot Password?</a>
+        </p>
     </div>
 
     <div class="dashboard-container">
         <header>
             <button id="logout-btn"
-                style="margin-bottom: 20px; padding: 8px 16px; background-color: #ff4c4c; color: white; border: none; border-radius: 4px; cursor: pointer;">Log Out</button>
+                style="margin-bottom: 20px; padding: 8px 16px; background-color: #ff4c4c; color: white; border: none; border-radius: 4px; cursor: pointer;">Log
+                Out</button>
             <h1>Mabuk Golden Enterprise - Inventory Calculator</h1>
             <button id="exportBtn" class="btn-primary">Download CSV Report</button>
         </header>
@@ -52,19 +57,7 @@
                         </select>
                     </div>
 
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <input type="text" id="searchBar" class="search-input" placeholder="Search by product name..."
-                            style="margin-bottom: 0;">
-
-                        <select id="categoryFilter" class="search-input" style="margin-bottom: 0; max-width: 200px;">
-                            <option value="All">All Categories</option>
-                            <option value="Tiles">Tiles</option>
-                            <option value="White Cement">White Cement</option>
-                            <option value="Genesis">Genesis</option>
-                            <option value="Roofing Sheets">Roofing Sheets</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
+                   
                     <div class="input-group-row">
                         <div class="input-group">
                             <label>Quantity</label>
@@ -117,74 +110,7 @@
         </main>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlZIwhWgeWkHrskLCuOVuW4l2P6NZ9__4",
-            authDomain: "mabukstock.firebaseapp.com",
-            projectId: "mabukstock",
-            storageBucket: "mabukstock.firebasestorage.app",
-            messagingSenderId: "749625031008",
-            appId: "1:749625031008:web:a8e565bcbdde99c22d0605",
-            measurementId: "G-0K9NNGR1R7"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        window.db = getFirestore(app);
-
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
-        const signupBtn = document.getElementById('signup-btn');
-        const loginBtn = document.getElementById('login-btn');
-        const authContainer = document.getElementById('auth-container');
-        const dashboardContainer = document.querySelector('.dashboard-container');
-
-        signupBtn.addEventListener('click', () => {
-            createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-                .then((userCredential) => {
-                    alert("Account created successfully!");
-                })
-                .catch((error) => {
-                    alert("Error: " + error.message);
-                });
-        });
-
-        loginBtn.addEventListener('click', () => {
-            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-                .then((userCredential) => {
-                    alert("Logged in successfully!");
-                })
-                .catch((error) => {
-                    alert("Error: " + error.message);
-                });
-        });
-
-        const logoutBtn = document.getElementById('logout-btn');
-
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert("Logged out successfully!");
-            }).catch((error) => {
-                alert("Error logging out: " + error.message);
-            });
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                authContainer.style.display = "none";
-                dashboardContainer.style.display = "block";
-            } else {
-                authContainer.style.display = "block";
-                dashboardContainer.style.display = "none";
-            }
-        });
-    </script>
-
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>

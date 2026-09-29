@@ -1,239 +1,218 @@
-const savedData = localStorage.getItem("businessInventoryDB");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDoc, doc, deleteDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBlZIwhWgeWkHrskLCuOVuW4l2P6NZ9__4",
+  authDomain: "mabukstock.firebaseapp.com",
+  projectId: "mabukstock",
+  storageBucket: "mabukstock.firebasestorage.app",
+  messagingSenderId: "749625031008",
+  appId: "1:749625031008:web:a8e565bcbdde99c22d0605",
+  measurementId: "G-0K9NNGR1R7"
+};
 
-const inventory = savedData ? JSON.parse(savedData) : [
-  {
-    id: 1,
-    name: "Sample Product A",
-    quantity: 100,
-    unitCost: 1000,
-    sellingPrice: 1500
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const emailInput = document.getElementById('email-input');
+const passwordInput = document.getElementById('password-input');
+const signupBtn = document.getElementById('signup-btn');
+const loginBtn = document.getElementById('login-btn');
+const authContainer = document.getElementById('auth-container');
+const dashboardContainer = document.querySelector('.dashboard-container');
+
+function updateUIState(user) {
+  if (!authContainer || !dashboardContainer) return;
+
+  if (user) {
+    authContainer.style.display = 'none';
+    dashboardContainer.style.display = 'block';
+  } else {
+    authContainer.style.display = 'block';
+    dashboardContainer.style.display = 'none';
   }
-];
-
-function saveInventory() {
-  localStorage.setItem("businessInventoryDB", JSON.stringify(inventory));
 }
 
-function calculateFinancials(inventoryArray) {
-  let totalCost = 0;
-  let totalRevenue = 0;
-
-  for (let item of inventoryArray) {
-    totalCost += (item.quantity * item.unitCost);
-    totalRevenue += (item.quantity * item.sellingPrice);
+signupBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  try {
+    await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
+    alert("Account created successfully!");
+  } catch (error) {
+    alert("Error: " + error.message);
   }
+});
 
-  let totalProfit = totalRevenue - totalCost;
+loginBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  try {
+    await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
+    alert("Logged in successfully!");
+  } catch (error) {
+    alert("Login Error: " + error.message);
+  }
+});
 
-  return {
-    cost: totalCost,
-    revenue: totalRevenue,
-    profit: totalProfit
-  };
-}
+const logoutBtn = document.getElementById('logout-btn');
 
-const listElement = document.getElementById("inventory-list");
-const costElement = document.getElementById("display-cost");
-const revenueElement = document.getElementById("display-revenue");
-const profitElement = document.getElementById("display-profit");
-const formElement = document.getElementById("add-item-form");
-
-let editingId = null;
-const submitBtn = formElement.querySelector("button");
-
-function editItem(idToEdit) {
-  const item = inventory.find(function (i) {
-    return i.id === idToEdit;
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+    } catch (error) {
+      alert("Error logging out: " + error.message);
+    }
   });
+}
 
-  if (item) {
-    document.getElementById("itemName").value = item.name;
-    document.getElementById("itemQty").value = item.quantity;
-    document.getElementById("itemCost").value = item.unitCost;
-    document.getElementById("itemPrice").value = item.sellingPrice;
-    document.getElementById("itemCategory").value = item.category || "Tiles";
+window.handleForgotPassword = async () => {
+  const email = prompt("Enter your account email address to reset your password:");
+  if (!email) return;
 
-    editingId = idToEdit;
-
-    submitBtn.textContent = "Update Item";
-    submitBtn.style.background = "#ffc107";
-    submitBtn.style.color = "black";
+  try {
+    await sendPasswordResetEmail(auth, email.trim());
+    alert("Password reset email sent! Check your inbox and spam folder.");
+  } catch (error) {
+    alert("Error sending reset email: " + error.message);
   }
-}
-function updateDashboard(dataToDisplay = inventory) {  listElement.innerHTML = "";
+};
 
-for (let item of dataToDisplay) {    const li = document.createElement("li");
+let unsubscribeInventory = null;
 
-    const textContainer = document.createElement("div");
-    textContainer.style.flexGrow = "1"; // Pushes your Edit/Delete buttons to the right
-    textContainer.innerHTML = `
-        <strong>${item.name}</strong> 
-        <span class="category-badge">${item.category || "Other"}</span>
-        <br>
-        <span style="font-size: 0.9rem; color: #6c757d;">Qty: ${item.quantity} | Cost: ₦${item.unitCost} | Price: ₦${item.sellingPrice}</span>
-    `;
-    li.appendChild(textContainer);
+const inventoryForm = document.getElementById('add-item-form');
 
-const searchBar = document.getElementById("searchBar");
-const categoryFilter = document.getElementById("categoryFilter");
+if (inventoryForm) {
+  inventoryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-function applyFilters() {
-    const searchTerm = searchBar.value.toLowerCase();
-    const selectedCategory = categoryFilter.value;
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to add items.");
+      return;
+    }
 
-    const filteredResults = inventory.filter(function(item) {
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm);
-        
-        const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-        
-        return matchesSearch && matchesCategory;
-    });
+    const nameInput = document.getElementById('itemName');
+    const categoryInput = document.getElementById('itemCategory');
+    const qtyInput = document.getElementById('itemQty');
+    const costInput = document.getElementById('itemCost');
+    const priceInput = document.getElementById('itemPrice');
 
-    updateDashboard(filteredResults);
-}
+    try {
+      await addDoc(collection(db, 'inventory'), {
+        name: nameInput.value.trim(),
+        category: categoryInput.value || 'General',
+        quantity: Number(qtyInput.value) || 0,
+        cost: Number(costInput.value) || 0,
+        price: Number(priceInput.value) || 0,
+        uid: user.uid,
+        createdAt: serverTimestamp()
+      });
 
-searchBar.addEventListener("input", applyFilters);
-categoryFilter.addEventListener("change", applyFilters);
-
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.style.marginLeft = "15px";
-    editBtn.style.background = "#ffc107";
-    editBtn.style.border = "none";
-    editBtn.style.cursor = "pointer";
-    editBtn.style.padding = "2px 8px";
-
-    editBtn.addEventListener("click", function () {
-      editItem(item.id);
-    });
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete";
-    deleteBtn.style.marginLeft = "15px";
-    deleteBtn.style.background = "#dc3545";
-    deleteBtn.style.color = "white";
-    deleteBtn.style.border = "none";
-    deleteBtn.style.cursor = "pointer";
-    deleteBtn.style.padding = "2px 8px";
-
-    deleteBtn.addEventListener("click", function () {
-      deleteItem(item.id);
-    });
-
-    li.appendChild(editBtn);
-    li.appendChild(deleteBtn);
-    listElement.appendChild(li);
-  }
-
-  const financials = calculateFinancials(dataToDisplay);
-
-  costElement.textContent = financials.cost.toLocaleString();
-  revenueElement.textContent = financials.revenue.toLocaleString();
-  profitElement.textContent = financials.profit.toLocaleString();
+      inventoryForm.reset();
+      alert("Item added successfully!");
+    } catch (error) {
+      alert("Error adding item: " + error.message);
+    }
+  });
 }
 
-formElement.addEventListener("submit", function (event) {
-  event.preventDefault();
+onAuthStateChanged(auth, (user) => {
+  updateUIState(user);
 
-  if (editingId === null) {
-    const newItem = {
-      id: Date.now(),
-      name: document.getElementById("itemName").value,
-      quantity: Number(document.getElementById("itemQty").value),
-      unitCost: Number(document.getElementById("itemCost").value),
-      sellingPrice: Number(document.getElementById("itemPrice").value),
-      category: document.getElementById("itemCategory").value,
-    };
-    inventory.push(newItem);
+  if (user) {
+    const q = query(collection(db, 'inventory'), where('uid', '==', user.uid));
+
+    unsubscribeInventory = onSnapshot(
+      q,
+      (snapshot) => {
+        const inventoryList = document.getElementById('inventory-list');
+        if (!inventoryList) return;
+
+        inventoryList.innerHTML = '';
+
+        let totalCostSum = 0;
+        let totalRevenueSum = 0;
+
+        snapshot.forEach((docSnap) => {
+          const item = docSnap.data();
+          const docId = docSnap.id;
+
+          const name = (item.name && item.name.trim() !== "") ? item.name : "Unnamed Item";
+          const category = item.category || "General";
+          const qty = Number(item.quantity) || 0;
+          const cost = Number(item.cost) || 0;
+          const price = Number(item.price) || 0;
+
+          totalCostSum += cost * qty;
+          totalRevenueSum += price * qty;
+
+          const itemElement = document.createElement('div');
+          itemElement.className = 'stock-item-card';
+          itemElement.style.cssText = "padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
+
+          itemElement.innerHTML = `
+            <div>
+              <strong>${name}</strong> <small style="color: #666;">(${category})</small>
+              <div><small>Qty: ${qty} | Cost: ₦${cost.toLocaleString()} | Selling: ₦${price.toLocaleString()}</small></div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="editStockItem('${docId}')" style="background: #ffc107; color: black; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Edit</button>
+              <button onclick="deleteStockItem('${docId}')" style="background: #ff4d4d; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete</button>
+            </div>
+          `;
+
+          inventoryList.appendChild(itemElement);
+        });
+
+        const totalCostEl = document.getElementById('display-cost');
+        const totalRevenueEl = document.getElementById('display-revenue');
+        const totalProfitEl = document.getElementById('display-profit');
+
+        if (totalCostEl) totalCostEl.textContent = totalCostSum.toLocaleString();
+        if (totalRevenueEl) totalRevenueEl.textContent = totalRevenueSum.toLocaleString();
+        if (totalProfitEl) totalProfitEl.textContent = (totalRevenueSum - totalCostSum).toLocaleString();
+      },
+      (error) => {
+        console.error("Firestore Subscription Error:", error);
+      }
+    );
 
   } else {
-    const index = inventory.findIndex(function (item) {
-      return item.id === editingId;
-    });
-
-    if (index !== -1) {
-      inventory[index].name = document.getElementById("itemName").value;
-      inventory[index].quantity = Number(document.getElementById("itemQty").value);
-      inventory[index].unitCost = Number(document.getElementById("itemCost").value);
-      inventory[index].sellingPrice = Number(document.getElementById("itemPrice").value);
-      inventory[index].category = document.getElementById("itemCategory").value;
-    }
-
-    editingId = null;
-    submitBtn.textContent = "Add to Inventory";
-    submitBtn.style.background = "";
-    submitBtn.style.color = "";
+    if (unsubscribeInventory) unsubscribeInventory();
   }
-
-  saveInventory();
-  updateDashboard();
-  formElement.reset();
 });
+window.editStockItem = async (docId) => {
+  try {
+    const docRef = doc(db, 'inventory', docId);
+    const docSnap = await getDoc(docRef);
 
-updateDashboard();
+    if (docSnap.exists()) {
+      const data = docSnap.data();
 
-const exportBtn = document.getElementById("exportBtn");
+      document.getElementById('itemName').value = data.name || '';
+      document.getElementById('itemCategory').value = data.category || 'Tiles';
+      document.getElementById('itemQty').value = data.quantity || 1;
+      document.getElementById('itemCost').value = data.cost || 0;
+      document.getElementById('itemPrice').value = data.price || 0;
 
-exportBtn.addEventListener("click", function() {
-    if (inventory.length === 0) {
-        alert("Your inventory is empty. Nothing to export!");
-        return;
+      await deleteDoc(docRef);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert("Item loaded into form for editing. Make your changes and click 'Add to Inventory'.");
     }
+  } catch (error) {
+    alert("Error preparing item for edit: " + error.message);
+  }
+};
 
-    let csvContent = "Product Name,Category,Quantity,Unit Cost (NGN),Selling Price (NGN)\n";
-
-    for (let item of inventory) {
-        csvContent += `${item.name},${item.category},${item.quantity},${item.unitCost},${item.sellingPrice}\n`;
-    }
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "mabuk_inventory_report.csv");
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-});
-
-function deleteItem(idToDelete) {
-  const isConfirmed = confirm("Are you sure you want to delete this item? This cannot be undone.");
-
-  if (isConfirmed) {
-    const index = inventory.findIndex(function (item) {
-      return item.id === idToDelete;
-    });
-
-    if (index !== -1) {
-      inventory.splice(index, 1);
-      saveInventory();
-      updateDashboard();
+window.deleteStockItem = async (docId) => {
+  if (confirm("Are you sure you want to delete this item?")) {
+    try {
+      await deleteDoc(doc(db, 'inventory', docId));
+    } catch (error) {
+      alert("Error deleting item: " + error.message);
     }
   }
-}
-
-const searchBar = document.getElementById("searchBar");
-
-searchBar.addEventListener("input", function() {
-    const searchTerm = searchBar.value.toLowerCase();
-    
-    const filteredResults = inventory.filter(function(item) {
-        return item.name.toLowerCase().includes(searchTerm);
-    });
-    
-    updateDashboard(filteredResults);
-});
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(registration => {
-        console.log('Service Worker registered successfully:', registration.scope);
-      })
-      .catch(error => {
-        console.log('Service Worker registration failed:', error);
-      });
-  });
-}
+};
