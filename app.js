@@ -172,6 +172,12 @@ if (inventoryForm) {
       });
 
       inventoryForm.reset();
+      const submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) {
+        submitBtn.textContent = "Add to Inventory";
+        submitBtn.style.backgroundColor = "";
+        submitBtn.style.color = "";
+      }
     } catch (error) {
       alert("Error adding item: " + error.message);
     }
@@ -217,6 +223,13 @@ window.editStockItem = async (docId) => {
 
       await deleteDoc(docRef);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) {
+        submitBtn.textContent = "Update Item";
+        submitBtn.style.backgroundColor = "#ffc107";
+        submitBtn.style.color = "#000";
+      }
     }
   } catch (error) {
     alert("Error preparing item for edit: " + error.message);
