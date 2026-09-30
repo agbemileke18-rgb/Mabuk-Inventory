@@ -34,3 +34,4 @@ I built this project without React or third-party libraries to demonstrate a roc
 1. Clone the repository: `git clone https://github.com/agbemileke18-rgb/mabuk-inventory.git`
 2. Open the directory in VS Code.
 3. Launch with Live Server (no build steps or npm packages required).
+

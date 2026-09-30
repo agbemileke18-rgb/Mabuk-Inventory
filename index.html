@@ -30,6 +30,10 @@
 
     <div class="dashboard-container">
         <header>
+            <span id="sub-status-badge"
+                style="background: #333; color: #28a745; font-size: 13px; padding: 4px 10px; border-radius: 12px; border: 1px solid #28a745; margin-right: 10px; display: inline-block;">
+                Loading trial status...
+            </span>
             <button id="logout-btn"
                 style="margin-bottom: 20px; padding: 8px 16px; background-color: #ff4c4c; color: white; border: none; border-radius: 4px; cursor: pointer;">Log
                 Out</button>
@@ -110,7 +114,34 @@
         </main>
     </div>
 
+    <div id="paywall-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; color: white; text-align: center; padding-top: 80px;">
+        <div
+            style="background: #1e1e1e; max-width: 420px; margin: 0 auto; padding: 30px; border-radius: 10px; border: 1px solid #333; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <h2 style="margin-top: 0; color: #ffffff;">Subscription Expired</h2>
+            <p style="color: #bbb; margin: 15px 0; font-size: 14px;">Your free trial or active subscription has ended.
+                Renew your plan to unlock your inventory dashboard and financial records.</p>
+
+            <div style="margin: 20px 0; background: #2a2a2a; padding: 15px; border-radius: 8px;">
+                <h3 style="color: #28a745; margin: 0 0 10px 0;">Pro Plan: ₦1,000 / month</h3>
+                <ul
+                    style="text-align: left; margin: 0 auto; max-width: 260px; color: #ddd; font-size: 13px; line-height: 1.8; padding-left: 20px;">
+                    <li>Full inventory & stock access</li>
+                    <li>Real-time profit & cost tracking</li>
+                    <li>Excel CSV report downloads</li>
+                </ul>
+            </div>
+
+            <button id="pay-now-btn"
+                style="background: #28a745; color: white; border: none; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer;">
+                Pay ₦1,000 with Paystack
+            </button>
+        </div>
+    </div>
+
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <script type="module" src="app.js"></script>
+
 </body>
 
 </html>
