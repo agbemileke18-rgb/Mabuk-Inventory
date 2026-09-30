@@ -82,6 +82,68 @@ window.handleForgotPassword = async () => {
 
 let unsubscribeInventory = null;
 
+let currentInventory = [];
+const searchBar = document.getElementById('searchBar');
+const categoryFilter = document.getElementById('categoryFilter');
+
+function renderInventory() {
+  const inventoryList = document.getElementById('inventory-list');
+  if (!inventoryList) return;
+
+  const searchTerm = searchBar ? searchBar.value.trim().toLowerCase() : '';
+  const selectedCategory = categoryFilter ? categoryFilter.value : 'All';
+
+  inventoryList.innerHTML = '';
+  let totalCostSum = 0;
+  let totalRevenueSum = 0;
+
+  const filteredItems = currentInventory.filter((item) => {
+    const name = (item.name || '').toLowerCase();
+    const category = item.category || 'General';
+    const matchesSearch = name.includes(searchTerm);
+    const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  filteredItems.forEach((item) => {
+    const docId = item.id;
+    const name = (item.name && item.name.trim() !== "") ? item.name : "Unnamed Item";
+    const category = item.category || "General";
+    const qty = Number(item.quantity) || 0;
+    const cost = Number(item.cost) || 0;
+    const price = Number(item.price) || 0;
+
+    totalCostSum += cost * qty;
+    totalRevenueSum += price * qty;
+
+    const itemElement = document.createElement('div');
+    itemElement.className = 'stock-item-card';
+    itemElement.style.cssText = "padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
+    itemElement.innerHTML = `
+      <div>
+        <strong>${name}</strong> <small style="color: #666;">(${category})</small>
+        <div><small>Qty: ${qty} | Cost: ₦${cost.toLocaleString()} | Selling: ₦${price.toLocaleString()}</small></div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="editStockItem('${docId}')" style="background: #ffc107; color: black; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Edit</button>
+        <button onclick="deleteStockItem('${docId}')" style="background: #ff4d4d; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete</button>
+      </div>
+    `;
+    inventoryList.appendChild(itemElement);
+  });
+
+  const totalCostEl = document.getElementById('display-cost');
+  const totalRevenueEl = document.getElementById('display-revenue');
+  const totalProfitEl = document.getElementById('display-profit');
+
+  if (totalCostEl) totalCostEl.textContent = totalCostSum.toLocaleString();
+  if (totalRevenueEl) totalRevenueEl.textContent = totalRevenueSum.toLocaleString();
+  if (totalProfitEl) totalProfitEl.textContent = (totalRevenueSum - totalCostSum).toLocaleString();
+}
+
+if (searchBar) searchBar.addEventListener('input', renderInventory);
+if (categoryFilter) categoryFilter.addEventListener('change', renderInventory);
+
 const inventoryForm = document.getElementById('add-item-form');
 
 if (inventoryForm) {
@@ -124,66 +186,24 @@ onAuthStateChanged(auth, (user) => {
 
   if (user) {
     const q = query(collection(db, 'inventory'), where('uid', '==', user.uid));
-
-    unsubscribeInventory = onSnapshot(
-      q,
-      (snapshot) => {
-        const inventoryList = document.getElementById('inventory-list');
-        if (!inventoryList) return;
-
-        inventoryList.innerHTML = '';
-
-        let totalCostSum = 0;
-        let totalRevenueSum = 0;
-
-        snapshot.forEach((docSnap) => {
-          const item = docSnap.data();
-          const docId = docSnap.id;
-
-          const name = (item.name && item.name.trim() !== "") ? item.name : "Unnamed Item";
-          const category = item.category || "General";
-          const qty = Number(item.quantity) || 0;
-          const cost = Number(item.cost) || 0;
-          const price = Number(item.price) || 0;
-
-          totalCostSum += cost * qty;
-          totalRevenueSum += price * qty;
-
-          const itemElement = document.createElement('div');
-          itemElement.className = 'stock-item-card';
-          itemElement.style.cssText = "padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
-
-          itemElement.innerHTML = `
-            <div>
-              <strong>${name}</strong> <small style="color: #666;">(${category})</small>
-              <div><small>Qty: ${qty} | Cost: ₦${cost.toLocaleString()} | Selling: ₦${price.toLocaleString()}</small></div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button onclick="editStockItem('${docId}')" style="background: #ffc107; color: black; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Edit</button>
-              <button onclick="deleteStockItem('${docId}')" style="background: #ff4d4d; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete</button>
-            </div>
-          `;
-
-          inventoryList.appendChild(itemElement);
-        });
-
-        const totalCostEl = document.getElementById('display-cost');
-        const totalRevenueEl = document.getElementById('display-revenue');
-        const totalProfitEl = document.getElementById('display-profit');
-
-        if (totalCostEl) totalCostEl.textContent = totalCostSum.toLocaleString();
-        if (totalRevenueEl) totalRevenueEl.textContent = totalRevenueSum.toLocaleString();
-        if (totalProfitEl) totalProfitEl.textContent = (totalRevenueSum - totalCostSum).toLocaleString();
-      },
+    unsubscribeInventory = onSnapshot(q, (snapshot) => {
+      currentInventory = [];
+      snapshot.forEach((docSnap) => {
+        currentInventory.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderInventory();
+    },
       (error) => {
         console.error("Firestore Subscription Error:", error);
       }
     );
-
   } else {
+    currentInventory = [];
+    renderInventory();
     if (unsubscribeInventory) unsubscribeInventory();
   }
 });
+
 window.editStockItem = async (docId) => {
   try {
     const docRef = doc(db, 'inventory', docId);
@@ -216,3 +236,40 @@ window.deleteStockItem = async (docId) => {
     }
   }
 };
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#export-btn') || (e.target.id === 'export-btn' ? e.target : null);
+  if (!btn) return;
+
+  e.preventDefault();
+
+  if (!currentInventory || currentInventory.length === 0) {
+    alert("No inventory data to export!");
+    return;
+  }
+
+  let csvContent = "Item Name,Category,Quantity,Unit Cost (Naira),Selling Price (Naira),Total Cost Value,Total Projected Revenue\n";
+
+  currentInventory.forEach((item) => {
+    const name = (item.name || "Unnamed Item").replace(/,/g, "");
+    const category = item.category || "General";
+    const qty = Number(item.quantity) || 0;
+    const cost = Number(item.cost) || 0;
+    const price = Number(item.price) || 0;
+
+    const totalCostValue = qty * cost;
+    const totalRevenueValue = qty * price;
+
+    csvContent += `${name},${category},${qty},${cost},${price},${totalCostValue},${totalRevenueValue}\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `MabukStock_Inventory_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
