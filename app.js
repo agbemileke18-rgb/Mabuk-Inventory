@@ -48,7 +48,6 @@ loginBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   try {
     await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
-    alert("Logged in successfully!");
   } catch (error) {
     alert("Login Error: " + error.message);
   }
@@ -61,7 +60,6 @@ if (logoutBtn) {
     e.preventDefault();
     try {
       await signOut(auth);
-      alert("Logged out successfully!");
     } catch (error) {
       alert("Error logging out: " + error.message);
     }
@@ -174,7 +172,6 @@ if (inventoryForm) {
       });
 
       inventoryForm.reset();
-      alert("Item added successfully!");
     } catch (error) {
       alert("Error adding item: " + error.message);
     }
@@ -220,7 +217,6 @@ window.editStockItem = async (docId) => {
 
       await deleteDoc(docRef);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert("Item loaded into form for editing. Make your changes and click 'Add to Inventory'.");
     }
   } catch (error) {
     alert("Error preparing item for edit: " + error.message);
