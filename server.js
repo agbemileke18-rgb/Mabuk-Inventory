@@ -2,11 +2,16 @@ const express = require("express");
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const crypto = require("crypto");
+const helmet = require("helmet");
+const cors = require("cors");
 
 const app = express();
+
+app.use(helmet());
+app.use(cors());
+
 app.use(express.json());
 
-// Initialize Firebase with Service Account credentials
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 initializeApp({

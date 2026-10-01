@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/agbemileke18-rgb/Mabuk-Inventory#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^5.2.1",
-    "firebase-admin": "^14.5.0"
+    "firebase-admin": "^14.5.0",
+    "helmet": "^8.3.0"
   }
 }
