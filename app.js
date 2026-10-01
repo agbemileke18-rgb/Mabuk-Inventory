@@ -246,13 +246,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     if (!isSubscribed) {
-      // Show Paywall Modal & clear inventory view
       if (paywallOverlay) paywallOverlay.style.display = 'block';
       currentInventory = [];
       renderInventory();
       if (unsubscribeInventory) unsubscribeInventory();
     } else {
-      // Hide Paywall & stream live inventory
       if (paywallOverlay) paywallOverlay.style.display = 'none';
 
       const q = query(collection(db, 'inventory'), where('uid', '==', user.uid));
@@ -379,25 +377,12 @@ document.addEventListener('click', (e) => {
       amount: 1000 * 100, // ₦1,000 in kobo
       currency: "NGN",
       ref: 'MBK_' + Math.floor((Math.random() * 1000000000) + 1),
+     
       callback: function (response) {
-        (async () => {
-          try {
-            const newExpiryDate = new Date();
-            newExpiryDate.setDate(newExpiryDate.getDate() + 30);
-
-            await setDoc(doc(db, 'users', user.uid), {
-              subscriptionStatus: 'active',
-              subscriptionEnd: newExpiryDate.toISOString(),
-              lastPaymentRef: response.reference,
-              updatedAt: serverTimestamp()
-            }, { merge: true });
-
-            alert("Payment successful! Your MabukStock subscription is active for 30 days.");
-            location.reload();
-          } catch (error) {
-            alert("Payment succeeded, but updating your account failed: " + error.message);
-          }
-        })();
+        alert("Payment successful! Updating your account status...");
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
       },
       onClose: function () {
         console.log('Payment modal closed.');
