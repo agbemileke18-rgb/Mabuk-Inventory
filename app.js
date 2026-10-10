@@ -39,16 +39,6 @@ signupBtn.addEventListener('click', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
     const user = userCredential.user;
 
-    const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + 14);
-
-    await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      subscriptionStatus: 'trial',
-      subscriptionEnd: trialEndDate.toISOString(),
-      createdAt: serverTimestamp()
-    });
-
     alert("Account created successfully!");
 
   } catch (error) {
@@ -197,86 +187,35 @@ if (inventoryForm) {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  updateUIState(user);
+    updateUIState(user);
 
-  if (user) {
-    const paywallOverlay = document.getElementById('paywall-overlay');
-    let isSubscribed = false;
-
-    try {
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      let expiryDate;
-      let isTrial = false;
-
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        expiryDate = new Date(userData.subscriptionEnd);
-        isTrial = userData.subscriptionStatus === 'trial';
-      } else {
-        // Fallback: Grant 14 days and create document if missing
-        expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 14);
-        isTrial = true;
-
-        await setDoc(userDocRef, {
-          email: user.email,
-          subscriptionStatus: 'trial',
-          subscriptionEnd: expiryDate.toISOString(),
-          createdAt: serverTimestamp()
-        });
-      }
-
-      const currentDate = new Date();
-      if (currentDate <= expiryDate) {
-        isSubscribed = true;
-      }
-
-      // Update the Status Badge UI
-      const subBadge = document.getElementById('sub-status-badge');
-      if (subBadge) {
-        const daysLeft = Math.max(0, Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24)));
-        subBadge.textContent = isTrial ? `Trial: ${daysLeft} days left` : `Pro: ${daysLeft} days left`;
-        subBadge.style.color = daysLeft <= 3 ? '#ff4d4d' : '#28a745';
-      }
-
-    } catch (err) {
-      console.error("Subscription check error:", err);
-    }
-
-    if (!isSubscribed) {
-      if (paywallOverlay) paywallOverlay.style.display = 'block';
-      currentInventory = [];
-      renderInventory();
-      if (unsubscribeInventory) unsubscribeInventory();
-    } else {
-      if (paywallOverlay) paywallOverlay.style.display = 'none';
-
-      const q = query(collection(db, 'inventory'), where('uid', '==', user.uid));
-      unsubscribeInventory = onSnapshot(
-        q,
-        (snapshot) => {
-          currentInventory = [];
-          snapshot.forEach((docSnap) => {
-            currentInventory.push({
-              id: docSnap.id,
-              ...docSnap.data()
-            });
-          });
-          renderInventory();
-        },
-        (error) => {
-          console.error("Firestore Subscription Error:", error);
+    if (user) {
+        const paywallOverlay = document.getElementById('paywall-overlay');
+        if (paywallOverlay) {
+            paywallOverlay.style.display = 'none'; // Ensure paywall is hidden for everyone
         }
-      );
-    }
 
-  } else {
-    currentInventory = [];
-    renderInventory();
-    if (unsubscribeInventory) unsubscribeInventory();
-  }
+        // Directly listen for the user's inventory items
+        const q = query(collection(db, 'inventory'), where('uid', '==', user.uid));
+        
+        unsubscribeInventory = onSnapshot(q, (snapshot) => {
+            currentInventory = [];
+            snapshot.forEach((docSnap) => {
+                currentInventory.push({
+                    id: docSnap.id,
+                    ...docSnap.data()
+                });
+            });
+            renderInventory();
+        }, (error) => {
+            console.error("Firestore Error:", error);
+        });
+
+    } else {
+        currentInventory = [];
+        renderInventory();
+        if (unsubscribeInventory) unsubscribeInventory();
+    }
 });
 
 window.editStockItem = async (docId) => {
@@ -353,42 +292,4 @@ document.addEventListener('click', (e) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-});
-
-const PAYSTACK_PUBLIC_KEY = "pk_live_d7daec8fa68494d3a0f624f8a1d61f9b3695b76b";
-
-document.addEventListener('click', (e) => {
-  const payBtn = e.target.closest('#pay-now-btn');
-  if (payBtn) {
-    const user = auth.currentUser;
-    if (!user) {
-      alert("You must be logged in to subscribe.");
-      return;
-    }
-
-    if (typeof PaystackPop === 'undefined') {
-      alert("Paystack SDK is not loaded.");
-      return;
-    }
-
-    const handler = PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: user.email,
-      amount: 1000 * 100, // ₦1,000 in kobo
-      currency: "NGN",
-      ref: 'MBK_' + Math.floor((Math.random() * 1000000000) + 1),
-     
-      callback: function (response) {
-        alert("Payment successful! Updating your account status...");
-        setTimeout(() => {
-          location.reload();
-        }, 2000);
-      },
-      onClose: function () {
-        console.log('Payment modal closed.');
-      }
-    });
-
-    handler.openIframe();
-  }
 });
